@@ -1,0 +1,14 @@
+{
+  "name": "linkedin-jobs-scraper-multi",
+  "version": "1.0.0",
+  "description": "LinkedIn Jobs Scraper: multiple titles x multiple locations, full job details, decoded apply URLs, deduplication.",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": { "start": "node src/main.js" },
+  "dependencies": {
+    "apify": "^3.2.6",
+    "crawlee": "^3.11.5",
+    "cheerio": "^1.0.0"
+  },
+  "license": "ISC"
+}

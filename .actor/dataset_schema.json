@@ -1,0 +1,28 @@
+{
+  "actorSpecification": 1,
+  "views": {
+    "overview": {
+      "title": "Overview",
+      "transformation": {
+        "fields": ["title", "companyName", "location", "workType", "postedAt", "applicantsCount", "salary", "seniorityLevel", "employmentType", "applyType", "applyUrl", "jobUrl"]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "title": { "label": "Title" },
+          "companyName": { "label": "Company" },
+          "location": { "label": "Location" },
+          "workType": { "label": "Work type" },
+          "postedAt": { "label": "Posted", "format": "date" },
+          "applicantsCount": { "label": "Applicants", "format": "number" },
+          "salary": { "label": "Salary" },
+          "seniorityLevel": { "label": "Seniority" },
+          "employmentType": { "label": "Employment" },
+          "applyType": { "label": "Apply type" },
+          "applyUrl": { "label": "Apply URL", "format": "link" },
+          "jobUrl": { "label": "LinkedIn", "format": "link" }
+        }
+      }
+    }
+  }
+}

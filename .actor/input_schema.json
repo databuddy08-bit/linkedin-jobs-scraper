@@ -1,0 +1,154 @@
+{
+  "title": "LinkedIn Jobs Scraper input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "jobTitles": {
+      "title": "Job titles / keywords",
+      "type": "array",
+      "description": "One search per title. Boolean operators work (e.g. \"python AND django\").",
+      "editor": "stringList",
+      "prefill": ["Software Engineer", "Data Analyst"]
+    },
+    "locations": {
+      "title": "Locations",
+      "type": "array",
+      "description": "Every title is searched in every location. Use \"Worldwide\" for no location filter.",
+      "editor": "stringList",
+      "prefill": ["London", "New York"]
+    },
+    "searchUrls": {
+      "title": "LinkedIn search URLs (optional)",
+      "type": "array",
+      "description": "Paste linkedin.com/jobs/search URLs directly. Their own filters are kept. Runs in addition to titles × locations.",
+      "editor": "stringList"
+    },
+    "maxResultsPerSearch": {
+      "title": "Max jobs per search",
+      "type": "integer",
+      "description": "Limit per title × location combination. LinkedIn exposes up to ~1,000 per search.",
+      "default": 100,
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "maxResultsTotal": {
+      "title": "Max jobs in total",
+      "type": "integer",
+      "description": "Hard cap for the whole run (0 = no cap). Controls your cost.",
+      "default": 0,
+      "minimum": 0
+    },
+    "postedWithin": {
+      "title": "Date posted",
+      "type": "string",
+      "editor": "select",
+      "enum": ["any", "1h", "24h", "week", "month"],
+      "enumTitles": ["Any time", "Past hour", "Past 24 hours", "Past week", "Past month"],
+      "default": "any"
+    },
+    "workTypes": {
+      "title": "Work type",
+      "type": "array",
+      "editor": "select",
+      "items": { "type": "string", "enum": ["onsite", "remote", "hybrid"], "enumTitles": ["On-site", "Remote", "Hybrid"] },
+      "default": []
+    },
+    "jobTypes": {
+      "title": "Job type",
+      "type": "array",
+      "editor": "select",
+      "items": {
+        "type": "string",
+        "enum": ["fulltime", "parttime", "contract", "temporary", "internship", "volunteer", "other"],
+        "enumTitles": ["Full-time", "Part-time", "Contract", "Temporary", "Internship", "Volunteer", "Other"]
+      },
+      "default": []
+    },
+    "experienceLevels": {
+      "title": "Experience level",
+      "type": "array",
+      "editor": "select",
+      "items": {
+        "type": "string",
+        "enum": ["internship", "entry", "associate", "mid-senior", "director", "executive"],
+        "enumTitles": ["Internship", "Entry level", "Associate", "Mid-Senior level", "Director", "Executive"]
+      },
+      "default": []
+    },
+    "easyApplyOnly": {
+      "title": "Easy Apply only",
+      "type": "boolean",
+      "default": false
+    },
+    "under10Applicants": {
+      "title": "Fewer than 10 applicants",
+      "type": "boolean",
+      "description": "Only jobs with fewer than 10 applicants (early-bird jobs).",
+      "default": false
+    },
+    "companyIds": {
+      "title": "Company IDs (optional)",
+      "type": "array",
+      "description": "Restrict to LinkedIn numeric company IDs (e.g. 1441 for Google).",
+      "editor": "stringList"
+    },
+    "distanceMiles": {
+      "title": "Distance from location (miles)",
+      "type": "integer",
+      "description": "Radius around each location. Leave empty for LinkedIn default.",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "sortBy": {
+      "title": "Sort by",
+      "type": "string",
+      "editor": "select",
+      "enum": ["recent", "relevant"],
+      "enumTitles": ["Most recent", "Most relevant"],
+      "default": "recent"
+    },
+    "scrapeJobDetails": {
+      "title": "Scrape full job details",
+      "type": "boolean",
+      "description": "Full description, salary, seniority, industries, applicants, decoded apply URL, recruiter. Turn off for a fast, cheap listing-only run.",
+      "default": true
+    },
+    "excludeKeywords": {
+      "title": "Exclude jobs whose title contains",
+      "type": "array",
+      "description": "Case-insensitive. E.g. \"Senior\", \"Lead\".",
+      "editor": "stringList"
+    },
+    "excludeCompanies": {
+      "title": "Exclude companies",
+      "type": "array",
+      "description": "Case-insensitive company names to skip (e.g. recruiting agencies).",
+      "editor": "stringList"
+    },
+    "maxConcurrency": {
+      "title": "Max concurrency",
+      "type": "integer",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 50,
+      "sectionCaption": "Advanced"
+    },
+    "maxRequestsPerMinute": {
+      "title": "Max requests per minute",
+      "type": "integer",
+      "description": "Throttle to stay under LinkedIn rate limits. Raise with residential proxies.",
+      "default": 120,
+      "minimum": 10,
+      "maximum": 1000
+    },
+    "proxyConfiguration": {
+      "title": "Proxy",
+      "type": "object",
+      "editor": "proxy",
+      "description": "Residential proxies give the most reliable results on LinkedIn.",
+      "prefill": { "useApifyProxy": true, "apifyProxyGroups": ["RESIDENTIAL"] },
+      "default": { "useApifyProxy": true, "apifyProxyGroups": ["RESIDENTIAL"] }
+    }
+  },
+  "required": []
+}

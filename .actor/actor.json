@@ -1,0 +1,11 @@
+{
+  "actorSpecification": 1,
+  "name": "linkedin-jobs-scraper-multi",
+  "title": "LinkedIn Jobs Scraper – Multi Title × Multi Location (Full Details)",
+  "description": "Scrape LinkedIn jobs for many titles and locations in one run. Full description, salary, seniority, industries, applicants, decoded external apply URLs, recruiter info, and cross-search deduplication. No cookies or login needed.",
+  "version": "1.0",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "storages": { "dataset": "./dataset_schema.json" },
+  "dockerfile": "../Dockerfile"
+}
