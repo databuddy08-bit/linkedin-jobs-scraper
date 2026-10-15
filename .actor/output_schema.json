@@ -1,0 +1,19 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "LinkedIn Jobs Scraper output",
+  "description": "Unique LinkedIn jobs found for every job title and location, plus a per-search run summary.",
+  "properties": {
+    "results": {
+      "type": "string",
+      "title": "Jobs",
+      "description": "All scraped jobs shown in the Overview table view.",
+      "template": "{{links.apiDefaultDatasetUrl}}/items?view=overview"
+    },
+    "runSummary": {
+      "type": "string",
+      "title": "Run summary",
+      "description": "Number of jobs saved per search, unique jobs found and jobs excluded by filters.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/RUN_SUMMARY"
+    }
+  }
+}
