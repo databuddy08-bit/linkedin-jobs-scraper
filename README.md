@@ -18,6 +18,7 @@ Scrape LinkedIn jobs for **many job titles across many locations in one run**, w
 | Exclude titles / companies (e.g. agencies) | ✅ | ❌ |
 | Per-search and total result caps | ✅ predictable cost | per search only |
 | Fast listing-only mode | ✅ | ❌ |
+| Verified work type (on-site / remote / hybrid) with the exact proof phrase | ✅ | ❌ trusts LinkedIn's filter |
 | Survives throttling | ✅ session rotation + exponential backoff, falls back to card data | ❌ |
 
 ## Input
@@ -25,7 +26,7 @@ Scrape LinkedIn jobs for **many job titles across many locations in one run**, w
 ```json
 {
   "jobTitles": ["Software Engineer", "Data Analyst"],
-  "locations": ["London", "New York", "Remote"],
+  "locations": ["London", "New York", "Berlin"],
   "postedWithin": "week",
   "workTypes": ["remote", "hybrid"],
   "experienceLevels": ["entry", "associate"],
@@ -40,13 +41,23 @@ Filters: date posted (1h / 24h / week / month), work type, job type, experience 
 
 ## Output (one row per unique job)
 
-`jobId, title, companyName, companyUrl, companyLogo, location, workType, postedAt, postedTimeAgo, applicantsCount, applicantsText, salary, benefits, seniorityLevel, employmentType, jobFunctions, industries, applyType, applyUrl, jobUrl, descriptionText, descriptionHtml, emailsInDescription, recruiterName, recruiterTitle, recruiterProfileUrl, isPromoted, isClosed, searchKeywords, searchLocation, scrapedAt`
+Job Title, Company Name, Location, **Work Type + Work Type Evidence**, Posted Date, Posted Time, Applications Count, Salary, Benefits, Contract Type, Experience Level, Sector, Job Function, Apply Type, Apply URL, Job URL, Company URL, Poster Full Name, Poster Profile URL, Emails in Description, Description (plain text and HTML), plus company logo, recruiter title, promoted / closed flags and the search that found the job.
 
-Export as JSON, CSV, Excel, or HTML. A `RUN_SUMMARY` record in the key-value store shows jobs per search.
+Export as JSON, CSV, Excel, or HTML. A `RUN_SUMMARY` record shows jobs per search and why any jobs were skipped.
+
+## Accurate work type, experience level and job type
+
+LinkedIn **ignores the work type, experience level and job type filters for logged-out visitors**, so most scrapers return "remote" jobs that are really on-site. This actor checks every job itself:
+
+- **Work type** is read from the job's own post, in this order: the job title, LinkedIn workplace tags (`#LI-Remote`, `#LI-Hybrid`, `#LI-Onsite`), statements about the role ("This position is remote within the US", "hybrid, 3 days a week in the office"), then general wording in the post. `workTypeEvidence` shows the exact phrase used.
+- If a post never states it, `workType` is empty. It is never guessed.
+- **Experience level** and **job type** are checked against what the job page shows.
+- Jobs that don't match are **skipped and not charged**, and the actor keeps searching until each search reaches your requested number.
+- Turn on **Include jobs that don't state it** to also get posts that don't state the detail (many employers leave seniority as "Not Applicable").
+- With a single work type selected, that word is added to the LinkedIn keyword search to find matching posts faster.
 
 ### Notes
-- `applyUrl` is filled when LinkedIn exposes the external link to logged-out visitors; LinkedIn currently keeps it behind sign-in for most jobs, so `applyType` (`external` / `easy_apply`) and `jobUrl` are always provided.
-- `workType` is exact when you filter by a single work type; otherwise it is inferred from the title, location, and description.
+- `applyUrl` is filled when LinkedIn shows the external link to logged-out visitors; most jobs keep it behind sign-in, so `applyType` (`external` / `easy_apply`) and `jobUrl` are always provided.
 - LinkedIn shows at most ~1,000 results per search. Split broad searches by location or date for more.
 - Residential proxies give the best reliability at high volume.
 

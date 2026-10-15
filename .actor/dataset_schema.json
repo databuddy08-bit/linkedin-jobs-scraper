@@ -10,58 +10,100 @@
           "companyName",
           "location",
           "workType",
+          "workTypeEvidence",
           "postedAt",
+          "postedTimeAgo",
           "applicantsCount",
           "salary",
-          "seniorityLevel",
+          "benefits",
           "employmentType",
+          "seniorityLevel",
+          "industries",
+          "jobFunction",
           "applyType",
           "applyUrl",
-          "jobUrl"
+          "jobUrl",
+          "companyUrl",
+          "recruiterName",
+          "recruiterProfileUrl",
+          "emailsInDescription",
+          "descriptionText"
         ]
       },
       "display": {
         "component": "table",
         "properties": {
           "title": {
-            "label": "Title"
+            "label": "Job Title"
           },
           "companyName": {
-            "label": "Company"
+            "label": "Company Name"
           },
           "location": {
             "label": "Location"
           },
           "workType": {
-            "label": "Work type"
+            "label": "Work Type"
+          },
+          "workTypeEvidence": {
+            "label": "Work Type Evidence"
           },
           "postedAt": {
-            "label": "Posted",
+            "label": "Posted Date",
             "format": "date"
           },
+          "postedTimeAgo": {
+            "label": "Posted Time"
+          },
           "applicantsCount": {
-            "label": "Applicants",
+            "label": "Applications Count",
             "format": "number"
           },
           "salary": {
             "label": "Salary"
           },
-          "seniorityLevel": {
-            "label": "Seniority"
+          "benefits": {
+            "label": "Benefits"
           },
           "employmentType": {
-            "label": "Employment"
+            "label": "Contract Type"
+          },
+          "seniorityLevel": {
+            "label": "Experience Level"
+          },
+          "industries": {
+            "label": "Sector"
+          },
+          "jobFunction": {
+            "label": "Job Function"
           },
           "applyType": {
-            "label": "Apply type"
+            "label": "Apply Type"
           },
           "applyUrl": {
             "label": "Apply URL",
             "format": "link"
           },
           "jobUrl": {
-            "label": "LinkedIn",
+            "label": "Job URL",
             "format": "link"
+          },
+          "companyUrl": {
+            "label": "Company URL",
+            "format": "link"
+          },
+          "recruiterName": {
+            "label": "Poster Full Name"
+          },
+          "recruiterProfileUrl": {
+            "label": "Poster Profile URL",
+            "format": "link"
+          },
+          "emailsInDescription": {
+            "label": "Emails in Description"
+          },
+          "descriptionText": {
+            "label": "Description"
           }
         }
       }

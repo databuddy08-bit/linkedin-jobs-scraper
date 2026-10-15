@@ -58,7 +58,7 @@ function htmlToText(html) {
         .replace(/<li[^>]*>/gi, '\n• ')
         .replace(/<(br|\/p|\/div|\/ul|\/ol|\/h\d|\/li)[^>]*>/gi, '\n')
         .replace(/<[^>]+>/g, '')
-        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'").replace(/&nbsp;/g, ' ')
         .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
         .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
         .replace(/[ \t]+/g, ' ')
@@ -119,13 +119,4 @@ export function parseJobDetail($) {
         recruiterProfileUrl: recruiterName ? stripQuery(recruiter.find('a').first().attr('href')) : null,
         isClosed: /no longer accepting applications/i.test($('.closed-job, .top-card-layout__entity-info').text()),
     };
-}
-
-/** Infers on-site / remote / hybrid from text when LinkedIn doesn't label it. */
-export function inferWorkType(...texts) {
-    const t = texts.filter(Boolean).join(' ').toLowerCase();
-    if (/\bhybrid\b/.test(t)) return 'hybrid';
-    if (/\bremote\b/.test(t)) return 'remote';
-    if (/\bon[- ]?site\b/.test(t)) return 'onsite';
-    return null;
 }
