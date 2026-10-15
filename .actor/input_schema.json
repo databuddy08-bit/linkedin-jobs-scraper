@@ -8,14 +8,20 @@
       "type": "array",
       "description": "One search per title. Boolean operators work (e.g. \"python AND django\").",
       "editor": "stringList",
-      "prefill": ["Software Engineer", "Data Analyst"]
+      "prefill": [
+        "Software Engineer",
+        "Data Analyst"
+      ]
     },
     "locations": {
       "title": "Locations",
       "type": "array",
       "description": "Every title is searched in every location. Use \"Worldwide\" for no location filter.",
       "editor": "stringList",
-      "prefill": ["London", "New York"]
+      "prefill": [
+        "London",
+        "New York"
+      ]
     },
     "searchUrls": {
       "title": "LinkedIn search URLs (optional)",
@@ -42,16 +48,42 @@
       "title": "Date posted",
       "type": "string",
       "editor": "select",
-      "enum": ["any", "1h", "24h", "week", "month"],
-      "enumTitles": ["Any time", "Past hour", "Past 24 hours", "Past week", "Past month"],
-      "default": "any"
+      "enum": [
+        "any",
+        "1h",
+        "24h",
+        "week",
+        "month"
+      ],
+      "enumTitles": [
+        "Any time",
+        "Past hour",
+        "Past 24 hours",
+        "Past week",
+        "Past month"
+      ],
+      "default": "any",
+      "description": "Only return jobs posted within this time window."
     },
     "workTypes": {
       "title": "Work type",
       "type": "array",
       "editor": "select",
-      "items": { "type": "string", "enum": ["onsite", "remote", "hybrid"], "enumTitles": ["On-site", "Remote", "Hybrid"] },
-      "default": []
+      "items": {
+        "type": "string",
+        "enum": [
+          "onsite",
+          "remote",
+          "hybrid"
+        ],
+        "enumTitles": [
+          "On-site",
+          "Remote",
+          "Hybrid"
+        ]
+      },
+      "default": [],
+      "description": "On-site, remote and/or hybrid. Leave empty for all."
     },
     "jobTypes": {
       "title": "Job type",
@@ -59,10 +91,27 @@
       "editor": "select",
       "items": {
         "type": "string",
-        "enum": ["fulltime", "parttime", "contract", "temporary", "internship", "volunteer", "other"],
-        "enumTitles": ["Full-time", "Part-time", "Contract", "Temporary", "Internship", "Volunteer", "Other"]
+        "enum": [
+          "fulltime",
+          "parttime",
+          "contract",
+          "temporary",
+          "internship",
+          "volunteer",
+          "other"
+        ],
+        "enumTitles": [
+          "Full-time",
+          "Part-time",
+          "Contract",
+          "Temporary",
+          "Internship",
+          "Volunteer",
+          "Other"
+        ]
       },
-      "default": []
+      "default": [],
+      "description": "Full-time, contract, internship, etc. Leave empty for all."
     },
     "experienceLevels": {
       "title": "Experience level",
@@ -70,15 +119,31 @@
       "editor": "select",
       "items": {
         "type": "string",
-        "enum": ["internship", "entry", "associate", "mid-senior", "director", "executive"],
-        "enumTitles": ["Internship", "Entry level", "Associate", "Mid-Senior level", "Director", "Executive"]
+        "enum": [
+          "internship",
+          "entry",
+          "associate",
+          "mid-senior",
+          "director",
+          "executive"
+        ],
+        "enumTitles": [
+          "Internship",
+          "Entry level",
+          "Associate",
+          "Mid-Senior level",
+          "Director",
+          "Executive"
+        ]
       },
-      "default": []
+      "default": [],
+      "description": "Seniority levels to include. Leave empty for all."
     },
     "easyApplyOnly": {
       "title": "Easy Apply only",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "Only return jobs that use LinkedIn Easy Apply."
     },
     "under10Applicants": {
       "title": "Fewer than 10 applicants",
@@ -103,9 +168,16 @@
       "title": "Sort by",
       "type": "string",
       "editor": "select",
-      "enum": ["recent", "relevant"],
-      "enumTitles": ["Most recent", "Most relevant"],
-      "default": "recent"
+      "enum": [
+        "recent",
+        "relevant"
+      ],
+      "enumTitles": [
+        "Most recent",
+        "Most relevant"
+      ],
+      "default": "recent",
+      "description": "Most recent first, or LinkedIn relevance order."
     },
     "scrapeJobDetails": {
       "title": "Scrape full job details",
@@ -131,7 +203,8 @@
       "default": 10,
       "minimum": 1,
       "maximum": 50,
-      "sectionCaption": "Advanced"
+      "sectionCaption": "Advanced",
+      "description": "Parallel requests. Higher is faster but more likely to be throttled."
     },
     "maxRequestsPerMinute": {
       "title": "Max requests per minute",
@@ -146,8 +219,18 @@
       "type": "object",
       "editor": "proxy",
       "description": "Residential proxies give the most reliable results on LinkedIn.",
-      "prefill": { "useApifyProxy": true, "apifyProxyGroups": ["RESIDENTIAL"] },
-      "default": { "useApifyProxy": true, "apifyProxyGroups": ["RESIDENTIAL"] }
+      "prefill": {
+        "useApifyProxy": true,
+        "apifyProxyGroups": [
+          "RESIDENTIAL"
+        ]
+      },
+      "default": {
+        "useApifyProxy": true,
+        "apifyProxyGroups": [
+          "RESIDENTIAL"
+        ]
+      }
     }
   },
   "required": []
