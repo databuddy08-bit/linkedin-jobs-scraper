@@ -16,7 +16,7 @@ const {
     excludeKeywords = [],
     excludeCompanies = [],
     includeUnclearJobs = false,
-    maxConcurrency = 10,
+    maxConcurrency = 25,
     proxyConfiguration,
 } = input;
 
@@ -115,6 +115,7 @@ const affordable = Actor.getChargingManager().calculateMaxEventChargeCountWithin
 const userCap = maxResultsTotal > 0 ? maxResultsTotal : Infinity;
 const totalCap = Math.min(userCap, affordable);
 let stopped = false;
+const startedAt = Date.now();
 
 if (totalCap <= 0) {
     log.warning('Your maximum cost per run is too low to save any jobs. Raise "Max cost per run" and try again.');
@@ -131,6 +132,24 @@ const isExcluded = (job) =>
     exCo.some((c) => job.companyName?.toLowerCase().includes(c));
 
 const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
+// With a proxy every retry gets a fresh IP, so we can go fast and retry quickly.
+// Without one, stay gentle: LinkedIn throttles a single IP hard.
+const maxRequestsPerMinute = input.maxRequestsPerMinute ?? (proxy ? 400 : 60);
+
+// Finish cleanly before the run's time limit, so the run ends as SUCCEEDED with everything saved.
+const timeoutAt = process.env.ACTOR_TIMEOUT_AT ? new Date(process.env.ACTOR_TIMEOUT_AT).getTime() : null;
+let timeoutTimer;
+if (timeoutAt) {
+    const ms = timeoutAt - Date.now() - 45_000;
+    if (ms > 0) {
+        timeoutTimer = setTimeout(() => {
+            stopped = true;
+            log.warning(`The run is about to reach its time limit, so it is finishing now with ${state.pushed} jobs saved. `
+                + 'For more jobs in one run, raise "Timeout" in the run options.');
+            crawler.stop('Run time limit reached');
+        }, ms);
+    }
+}
 
 const acceptedFor = (i) => state.accepted[i] ?? 0;
 const searchFull = (i) => acceptedFor(i) >= maxResultsPerSearch;
@@ -204,14 +223,17 @@ async function saveJob(base, detail, searchIndex) {
         stopped = true;
         crawler.stop('Requested number of jobs reached');
     }
-    if (state.pushed % 50 === 0) log.info(`Saved ${state.pushed} jobs so far`);
+    if (state.pushed % 50 === 0) {
+        const perMin = Math.round(state.pushed / Math.max(1, (Date.now() - startedAt) / 60_000));
+        log.info(`Saved ${state.pushed} jobs so far (~${perMin} jobs/min)`);
+    }
 }
 
 // ---------- Crawler ----------
 const crawler = new CheerioCrawler({
     proxyConfiguration: proxy,
     maxConcurrency,
-    maxRequestsPerMinute: input.maxRequestsPerMinute ?? 120,
+    maxRequestsPerMinute,
     maxRequestRetries: 6,
     requestHandlerTimeoutSecs: 60,
     useSessionPool: true,
@@ -230,7 +252,10 @@ const crawler = new CheerioCrawler({
     async errorHandler({ request, session }) {
         // LinkedIn throttles with 429 / 999: rotate identity and back off exponentially (with jitter).
         session?.retire();
-        await sleep(Math.min(60_000, 1500 * 2 ** request.retryCount) + Math.random() * 1000);
+        const wait = proxy
+            ? 500 + Math.random() * 1500 // new IP on retry: a short pause is enough
+            : Math.min(60_000, 1500 * 2 ** request.retryCount) + Math.random() * 1000;
+        await sleep(wait);
     },
 
     async requestHandler({ request, $, response, session, crawler: c }) {
@@ -314,6 +339,7 @@ await crawler.run(
     })),
 );
 
+clearTimeout(timeoutTimer);
 const summary = {
     searches: searches.length,
     jobsSaved: state.pushed,

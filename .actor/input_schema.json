@@ -206,17 +206,16 @@
     "maxConcurrency": {
       "title": "Max concurrency",
       "type": "integer",
-      "default": 10,
+      "default": 25,
       "minimum": 1,
       "maximum": 50,
       "sectionCaption": "Advanced",
-      "description": "Parallel requests. Higher is faster but more likely to be throttled."
+      "description": "Parallel requests. Higher is faster; with residential proxies 25 is a good default."
     },
     "maxRequestsPerMinute": {
       "title": "Max requests per minute",
       "type": "integer",
-      "description": "Throttle to stay under LinkedIn rate limits. Raise with residential proxies.",
-      "default": 120,
+      "description": "Throttle for LinkedIn requests. Leave empty for automatic: 400/min with a proxy, 60/min without.",
       "minimum": 10,
       "maximum": 1000
     },
