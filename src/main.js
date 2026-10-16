@@ -280,6 +280,18 @@ const crawler = new CheerioCrawler({
             if (stopped || searchFull(searchIndex)) return;
             const cards = parseSearchCards($);
             if (!cards.length) {
+                // The quoted exact phrase found nothing: retry once without quotes. Titles are still checked.
+                if (start === 0 && /"/.test(search.params.keywords ?? '') && !search.unquoted) {
+                    search.unquoted = true;
+                    search.params = { ...search.params, keywords: search.params.keywords.replace(/"/g, '') };
+                    log.info(`[${search.label}] no exact-phrase results on LinkedIn, retrying a broader search`);
+                    await c.addRequests([{
+                        url: buildSearchUrl(search.params, 0),
+                        uniqueKey: `search-${searchIndex}-0-broad`,
+                        userData: { label: 'SEARCH', searchIndex, start: 0 },
+                    }]);
+                    return;
+                }
                 if (!state.done[searchIndex]) log.info(`[${search.label}] no more results (${acceptedFor(searchIndex)} jobs)`);
                 state.done[searchIndex] = true;
                 return;
