@@ -13,6 +13,23 @@
         "Data Analyst"
       ]
     },
+    "titleMatch": {
+      "title": "Job title must match",
+      "type": "string",
+      "editor": "select",
+      "description": "LinkedIn's search is fuzzy (\"AI Engineer\" also returns \"Electrical Engineer\"). Exact phrase (default): the job title must contain your whole keyword, words in order (\"Senior AI Engineer\" yes, \"AI Software Engineer\" no). All words: every word of your keyword must be in the title, any order. Off: keep everything LinkedIn returns. Spelling variants count as the same (Full-Stack = Fullstack, A.I. = AI = Artificial Intelligence). Non-matching jobs are skipped and never charged.",
+      "enum": [
+        "exact",
+        "allWords",
+        "off"
+      ],
+      "enumTitles": [
+        "Exact phrase",
+        "All words, any order",
+        "Off (LinkedIn's results as they are)"
+      ],
+      "default": "exact"
+    },
     "locations": {
       "title": "Locations",
       "type": "array",

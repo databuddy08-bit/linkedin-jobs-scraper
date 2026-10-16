@@ -18,6 +18,7 @@ Scrape LinkedIn jobs for **many job titles across many locations in one run**, w
 | Exclude titles / companies (e.g. agencies) | ✅ | ❌ |
 | Per-search and total result caps | ✅ predictable cost | per search only |
 | Fast listing-only mode | ✅ | ❌ |
+| Exact job-title matching ("AI Engineer" never returns "Electrical Engineer") | ✅ | ❌ LinkedIn's fuzzy search |
 | Verified work type (on-site / remote / hybrid) with the exact proof phrase | ✅ | ❌ trusts LinkedIn's filter |
 | Survives throttling | ✅ session rotation + exponential backoff, falls back to card data | ❌ |
 
@@ -44,6 +45,16 @@ Filters: date posted (1h / 24h / week / month), work type, job type, experience 
 Job Title, Company Name, Location, **Work Type + Work Type Evidence**, Posted Date, Posted Time, Applications Count, Salary, Benefits, Contract Type, Experience Level, Sector, Job Function, Apply Type, Apply URL, Job URL, Company URL, Poster Full Name, Poster Profile URL, Emails in Description, Description (plain text and HTML), plus company logo, recruiter title, promoted / closed flags and the search that found the job.
 
 Export as JSON, CSV, Excel, or HTML. A `RUN_SUMMARY` record shows jobs per search and why any jobs were skipped.
+
+## Exact job titles
+
+LinkedIn's keyword search is fuzzy: "AI Engineer" also returns "Electrical Engineer" and "Machine Learning Engineer". This actor checks every job title against your keyword before opening the job, so mismatches are skipped and **never charged**.
+
+- **Exact phrase** (default): the title must contain your whole keyword, words in order. "AI Engineer" keeps "Senior AI Engineer" and "Applied AI Engineer", and skips "AI Software Engineer".
+- **All words, any order**: every word must be in the title. "AI Engineer" also keeps "AI Software Engineer" and "Engineer, AI Platform".
+- **Off**: keep everything LinkedIn returns.
+- Spelling variants count as the same: Full-Stack = Fullstack = Full Stack, A.I. = AI = Artificial Intelligence, ML = Machine Learning, Sr = Senior.
+- Boolean keywords such as `python AND django` require every term; queries with `OR` / `NOT` are left as you wrote them.
 
 ## Accurate work type, experience level and job type
 

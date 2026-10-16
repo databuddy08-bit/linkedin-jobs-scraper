@@ -3,6 +3,7 @@ import { CheerioCrawler, sleep } from 'crawlee';
 import { buildFilterParams, buildSearchUrl, paramsFromSearchUrl, detailUrl, publicJobUrl, PAGE_SIZE } from './urls.js';
 import { parseSearchCards, parseJobDetail } from './parsers.js';
 import { detectWorkType } from './worktype.js';
+import { makeTitleMatcher } from './titlematch.js';
 
 await Actor.init();
 
@@ -16,6 +17,7 @@ const {
     excludeKeywords = [],
     excludeCompanies = [],
     includeUnclearJobs = false,
+    titleMatch = 'exact',
     maxConcurrency = 25,
     proxyConfiguration,
 } = input;
@@ -69,8 +71,16 @@ const wtBoost = input.workTypes?.length === 1 ? WT_KEYWORD[input.workTypes[0]] :
 for (const keywords of titles.length ? titles : ['']) {
     for (const location of locs.length ? locs : ['Worldwide']) {
         if (!keywords && !locs.length) continue;
-        const kw = wtBoost && !new RegExp(`\\b${wtBoost}\\b`, 'i').test(keywords) ? `${keywords} ${wtBoost}`.trim() : keywords;
-        searches.push({ label: `${keywords || '(any)'} @ ${location}`, params: { keywords: kw, location, ...filters }, verify: inputVerify });
+        // In exact mode, send the phrase in quotes so LinkedIn ranks exact-phrase jobs first.
+        const advanced = /["()]|\b(?:AND|OR|NOT)\b/.test(keywords);
+        let kw = titleMatch === 'exact' && keywords && !advanced && /\s/.test(keywords) ? `"${keywords}"` : keywords;
+        if (wtBoost && !new RegExp(`\\b${wtBoost}\\b`, 'i').test(keywords)) kw = `${kw} ${wtBoost}`.trim();
+        searches.push({
+            label: `${keywords || '(any)'} @ ${location}`,
+            params: { keywords: kw, location, ...filters },
+            verify: inputVerify,
+            titleOk: makeTitleMatcher(keywords, titleMatch),
+        });
     }
 }
 for (const url of searchUrls.filter(Boolean)) {
@@ -81,7 +91,7 @@ for (const url of searchUrls.filter(Boolean)) {
             experienceLevels: fromUrlCodes(params.f_E, URL_E),
             jobTypes: fromUrlCodes(params.f_JT, URL_JT),
         });
-        searches.push({ label: url, params, verify });
+        searches.push({ label: url, params, verify, titleOk: makeTitleMatcher(params.keywords, titleMatch) });
     } catch {
         log.warning(`Skipping invalid search URL: ${url}`);
     }
@@ -103,7 +113,7 @@ const maxChecksPerSearch = Math.min(1000, Math.max(maxResultsPerSearch * 20, 200
 log.info(`Running ${searches.length} search(es): ${searches.map((s) => s.label).join(' | ')}`);
 
 // ---------- State (survives migrations / restarts) ----------
-const state = await Actor.useState('STATE', { seen: {}, pushed: 0, accepted: {}, checked: {}, excluded: 0, rejected: 0, rejectedBy: {}, done: {} });
+const state = await Actor.useState('STATE', { seen: {}, pushed: 0, accepted: {}, checked: {}, excluded: 0, rejected: 0, rejectedBy: {}, titleMismatch: {}, titleRejected: 0, done: {} });
 
 // ---------- Monetization (pay-per-event) ----------
 // Billable events, configured in Apify Console > Publishing > Monetization:
@@ -278,6 +288,15 @@ const crawler = new CheerioCrawler({
             const details = [];
             for (const card of cards) {
                 if (state.seen[card.jobId]) continue; // dedupe across all searches
+                // Title must contain the keyword. Not marked as seen: another keyword may still match it.
+                if (!search.titleOk(card.title ?? '')) {
+                    state.checked[searchIndex] = (state.checked[searchIndex] ?? 0) + 1;
+                    if (!state.titleMismatch[card.jobId]) {
+                        state.titleMismatch[card.jobId] = true;
+                        state.titleRejected++;
+                    }
+                    continue;
+                }
                 state.seen[card.jobId] = true;
                 if (isExcluded(card)) { state.excluded++; continue; } // skip before fetching details
                 state.checked[searchIndex] = (state.checked[searchIndex] ?? 0) + 1;
@@ -345,6 +364,7 @@ const summary = {
     jobsSaved: state.pushed,
     uniqueJobsChecked: Object.keys(state.seen).length,
     excludedByTitleOrCompany: state.excluded,
+    titleDidNotMatchKeyword: state.titleRejected,
     notMatchingFilters: state.rejected,
     notMatchingBreakdown: state.rejectedBy,
     perSearch: Object.fromEntries(searches.map((s, i) => [s.label, acceptedFor(i)])),
