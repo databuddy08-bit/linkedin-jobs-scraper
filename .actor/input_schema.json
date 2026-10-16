@@ -103,9 +103,9 @@
       "description": "On-site, remote and/or hybrid. LinkedIn does not apply this filter for logged-out visitors, so every job is checked against its own title and description, and only jobs that clearly state a matching arrangement are saved (and charged)."
     },
     "includeUnclearJobs": {
-      "title": "Include jobs that don't state it",
+      "title": "Include jobs that don't state it (blank work type)",
       "type": "boolean",
-      "description": "Many employers never state the work type, or leave seniority as \"Not Applicable\". Off (default): with work type, experience or job type filters, only jobs that clearly match are saved. On: also save jobs where that detail is not stated.",
+      "description": "Off (default, recommended): with a work type filter, only jobs whose post clearly states remote / hybrid / on-site are saved, so the Work Type column is never blank. With experience or job type filters, only jobs that state them are saved. On: also save jobs where the detail is not stated (Work Type left blank).",
       "default": false
     },
     "jobTypes": {
@@ -219,6 +219,19 @@
       "type": "array",
       "description": "Case-insensitive company names to skip (e.g. recruiting agencies).",
       "editor": "stringList"
+    },
+    "skipPreviouslyScraped": {
+      "title": "Skip jobs from previous runs",
+      "type": "boolean",
+      "description": "For scheduled daily runs: jobs already delivered by an earlier run (with the same history name) are skipped and not charged, so every run gives only new jobs. Lets you search a wider window such as \"Past week\" every day without repeats. History is kept for 90 days.",
+      "default": false
+    },
+    "historyName": {
+      "title": "History name",
+      "type": "string",
+      "editor": "textfield",
+      "description": "Name of the key-value store in your account that remembers delivered jobs. Use a different name for each separate search you schedule.",
+      "default": "linkedin-jobs-history"
     },
     "maxConcurrency": {
       "title": "Max concurrency",

@@ -18,6 +18,8 @@ const {
     excludeCompanies = [],
     includeUnclearJobs = false,
     titleMatch = 'exact',
+    skipPreviouslyScraped = false,
+    historyName = 'linkedin-jobs-history',
     maxConcurrency = 25,
     proxyConfiguration,
 } = input;
@@ -141,6 +143,29 @@ const isExcluded = (job) =>
     exKw.some((k) => job.title?.toLowerCase().includes(k)) ||
     exCo.some((c) => job.companyName?.toLowerCase().includes(c));
 
+// ---------- Cross-run history: skip jobs already delivered by earlier runs ----------
+// Stored in a named key-value store in the user's own account, so it survives between runs.
+const HISTORY_KEY = 'SEEN_JOB_IDS';
+const HISTORY_DAYS = 90;
+let history = null; // { [jobId]: dayNumber }
+let historyStore = null;
+const today = Math.floor(Date.now() / 86_400_000);
+if (skipPreviouslyScraped) {
+    historyStore = await Actor.openKeyValueStore(historyName);
+    history = (await historyStore.getValue(HISTORY_KEY)) ?? {};
+    for (const [id, day] of Object.entries(history)) if (today - day > HISTORY_DAYS) delete history[id];
+    log.info(`Skipping ${Object.keys(history).length} jobs already delivered in previous runs (history "${historyName}").`);
+}
+let historyDirty = false;
+async function saveHistory() {
+    if (!historyStore || !historyDirty) return;
+    historyDirty = false;
+    await historyStore.setValue(HISTORY_KEY, history);
+}
+
+Actor.on('migrating', saveHistory);
+Actor.on('aborting', saveHistory);
+
 const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
 // With a proxy every retry gets a fresh IP, so we can go fast and retry quickly.
 // Without one, stay gentle: LinkedIn throttles a single IP hard.
@@ -222,6 +247,11 @@ async function saveJob(base, detail, searchIndex) {
     }
 
     state.pushed++;
+    if (history) {
+        history[record.jobId] = today;
+        historyDirty = true;
+        if (state.pushed % 50 === 0) await saveHistory();
+    }
     state.accepted[searchIndex] = acceptedFor(searchIndex) + 1;
     const charge = await Actor.pushData(record, EVENT);
 
@@ -300,6 +330,11 @@ const crawler = new CheerioCrawler({
             const details = [];
             for (const card of cards) {
                 if (state.seen[card.jobId]) continue; // dedupe across all searches
+                if (history?.[card.jobId] !== undefined) { // delivered by an earlier run: skip, never charged
+                    state.seen[card.jobId] = true;
+                    state.fromPreviousRuns = (state.fromPreviousRuns ?? 0) + 1;
+                    continue;
+                }
                 // Title must contain the keyword. Not marked as seen: another keyword may still match it.
                 if (!search.titleOk(card.title ?? '')) {
                     state.checked[searchIndex] = (state.checked[searchIndex] ?? 0) + 1;
@@ -371,12 +406,14 @@ await crawler.run(
 );
 
 clearTimeout(timeoutTimer);
+await saveHistory();
 const summary = {
     searches: searches.length,
     jobsSaved: state.pushed,
     uniqueJobsChecked: Object.keys(state.seen).length,
     excludedByTitleOrCompany: state.excluded,
     titleDidNotMatchKeyword: state.titleRejected,
+    skippedFromPreviousRuns: state.fromPreviousRuns ?? 0,
     notMatchingFilters: state.rejected,
     notMatchingBreakdown: state.rejectedBy,
     perSearch: Object.fromEntries(searches.map((s, i) => [s.label, acceptedFor(i)])),

@@ -67,6 +67,10 @@ LinkedIn **ignores the work type, experience level and job type filters for logg
 - Turn on **Include jobs that don't state it** to also get posts that don't state the detail (many employers leave seniority as "Not Applicable").
 - With a single work type selected, that word is added to the LinkedIn keyword search to find matching posts faster.
 
+## Daily scheduled runs without repeats
+
+Turn on **Skip jobs from previous runs** and schedule the actor daily. Jobs delivered by an earlier run are skipped and not charged, so each run returns only new jobs. This lets you search **Past week** every day and still get no repeats. Use a different **History name** for each separate scheduled search.
+
 ### Notes
 - `applyUrl` is filled when LinkedIn shows the external link to logged-out visitors; most jobs keep it behind sign-in, so `applyType` (`external` / `easy_apply`) and `jobUrl` are always provided.
 - LinkedIn shows at most ~1,000 results per search. Split broad searches by location or date for more.
